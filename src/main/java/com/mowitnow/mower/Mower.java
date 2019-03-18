@@ -18,6 +18,7 @@ public class Mower {
     private Point position;
     private Orientation orientation;
     private LawnLimit lawnLimit;
+    private MowerListener listener;
 
     /**
      * Constructor.
@@ -30,15 +31,11 @@ public class Mower {
         this.lawnLimit = lawnLimit;
         position = new Point(0,0);
         orientation = Orientation.N;
+        listener = null;
     }
 
-    /**
-     * Retieve position and orientation
-     *
-     * @return the state of the mower
-     */
-    public MowerState getState() {
-        return new MowerState(orientation, position);
+    public void setListener(MowerListener listener) {
+        this.listener = listener;
     }
 
     /**
@@ -64,11 +61,10 @@ public class Mower {
      * @return the state after commands execution
      * @throws MowerException if something went wrong
      */
-    public MowerState execute(List<Command> commands) throws MowerException {
-        for (Command cmd : commands) {
-            execute(cmd);
-        }
-        return getState();
+    public void execute(List<Command> commands) {
+        commands.forEach(this::runCommand);
+        if(listener != null)
+            listener.commandsExecuted(new MowerState(orientation, position));
     }
 
     /**
@@ -76,33 +72,27 @@ public class Mower {
      *
      * @param command the Command to execute
      * @return the state after the command execution
-     * @throws MowerException if command is unknown
      */
-    public MowerState execute(Command command) throws MowerException {
-        if(position == null || orientation == null) throw new MowerException("Mower have not been initialized");
+    private void runCommand(Command command) {
         switch (command) {
             case D:
-                rotate(true);
-                break;
             case G:
-                rotate(false);
+                rotate( command == Command.D);
                 break;
             case A:
                 forward();
                 break;
             default:
-                throw new MowerException("Invalid command " + command.toString());
+                break;
         }
-        return getState();
     }
 
     /**
      * Rotate mower by 90° (clockwize=true) or -90° (clockwize=false)
      *
      * @param clockwise rotation orientation
-     * @throws MowerException if orientation is unknown
      */
-    private void rotate(boolean clockwise) throws MowerException {
+    private void rotate(boolean clockwise) {
         switch (orientation) {
             case N:
                 orientation = clockwise ? Orientation.E : Orientation.W;
@@ -117,16 +107,15 @@ public class Mower {
                 orientation = clockwise ? Orientation.N : Orientation.S;
                 break;
             default:
-                throw new MowerException("Invalid orientation " + orientation.toString());
+                break;
         }
     }
 
     /**
      * One step forward depending of the orientation. If the mower go outsize the lawn, position is unchanged
      *
-     * @throws MowerException if orientation is unknown
      */
-    private void forward() throws MowerException {
+    private void forward() {
         Point nextPosition;
 
         switch (orientation) {
@@ -143,7 +132,7 @@ public class Mower {
                 nextPosition = position.translate(0, -1);
                 break;
             default:
-                throw new MowerException("Invalid orientation" + orientation.toString());
+                return;
         }
 
         if (lawnLimit.contains(nextPosition))

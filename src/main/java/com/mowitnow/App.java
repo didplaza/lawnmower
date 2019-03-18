@@ -28,6 +28,7 @@ public class App {
                 Mower mower = new Mower(lawnLimit);
                 MowerState state = MowerDataHelper.readMowerState(line);
                 mower.setState(state);
+                mower.setListener(s -> System.out.println("End state "+s));
                 System.out.println("Initial State: " + state);
                 line = lnr.readLine();
                 if (line == null) {
@@ -35,8 +36,7 @@ public class App {
                     break;
                 }
                 System.out.println("Executing " + line);
-                state = mower.execute(MowerDataHelper.readCommandList(line));
-                System.out.println("End state " + state);
+                mower.execute(MowerDataHelper.readCommandList(line));
             }
         }
     }

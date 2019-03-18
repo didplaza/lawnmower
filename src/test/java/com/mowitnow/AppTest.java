@@ -55,26 +55,22 @@ public class AppTest {
         try {
             LawnLimit lawnLimit = new LawnLimit(2, 2);
             Mower mower = new Mower(lawnLimit);
-            assertEquals(mower.getState().getPosition(), new Point(0,0));
-            assertEquals(mower.getState().getOrientation(), Orientation.N);
-
             mower.setState(new MowerState(Orientation.N, new Point(1, 1)));
-            MowerState state;
 
-            state = mower.execute(Arrays.asList(Command.D,Command.D));
-            assertEquals(state.getOrientation(), Orientation.S);
+            mower.setListener(state -> assertEquals(state.getOrientation(), Orientation.S));
+            mower.execute(Arrays.asList(Command.D,Command.D));
 
-            state = mower.execute(Arrays.asList(Command.G,Command.G,Command.G));
-            assertEquals(state.getOrientation(), Orientation.W);
+            mower.setListener( state -> assertEquals(state.getOrientation(), Orientation.W));
+            mower.execute(Arrays.asList(Command.G,Command.G,Command.G));
 
-            state = mower.execute(Command.A);
-            assertEquals(state.getPosition(), new Point(0, 1));
+            mower.setListener(state -> assertEquals(state.getPosition(), new Point(0, 1)));
+            mower.execute(Arrays.asList(Command.A));
 
-            state = mower.execute(Command.A);
-            assertEquals(state.getPosition(), new Point(0, 1));
+            mower.setListener(state -> assertEquals(state.getPosition(), new Point(0, 1)));
+            mower.execute(Arrays.asList(Command.A));
 
-            state = mower.execute(Arrays.asList(Command.D, Command.A, Command.A));
-            assertEquals(state.getPosition(), new Point(0, 2));
+            mower.setListener(state -> assertEquals(state.getPosition(), new Point(0, 2)));
+            mower.execute(Arrays.asList(Command.D, Command.A, Command.A));
         } catch (MowerException e) {
             fail(e.getMessage());
         }
@@ -113,9 +109,11 @@ public class AppTest {
             MowerState state = MowerDataHelper.readMowerState("1 2 N");
             mower.setState(state);
             List<Command> commands = MowerDataHelper.readCommandList("GAGAGAGAA");
-            state = mower.execute(commands);
-            assertSame(state.getOrientation(), Orientation.N);
-            assertEquals(state.getPosition(), new Point(1, 3));
+            mower.setListener(s -> {
+                assertSame(s.getOrientation(), Orientation.N);
+                assertEquals(s.getPosition(), new Point(1, 3));
+            });
+            mower.execute(commands);
         } catch (MowerException e) {
             fail(e.getMessage());
         }
@@ -126,21 +124,20 @@ public class AppTest {
         try {
             LawnLimit lawnLimit = MowerDataHelper.readLawnLimit("5 5");
             Mower mower1 = new Mower(lawnLimit);
-            MowerState state1 = MowerDataHelper.readMowerState("1 2 N");
-            mower1.setState(state1);
-            state1 = mower1.execute(MowerDataHelper.readCommandList("GAGAGAGAA"));
+            mower1.setState(MowerDataHelper.readMowerState("1 2 N"));
+            mower1.setListener(state -> {
+                assertEquals(state.getPosition(), new Point(1, 3));
+                assertSame(state.getOrientation(), Orientation.N);
+            });
+            mower1.execute(MowerDataHelper.readCommandList("GAGAGAGAA"));
 
             Mower mower2 = new Mower(lawnLimit);
-            MowerState state2 = MowerDataHelper.readMowerState("3 3 E");
-            mower2.setState(state2);
-            state2 = mower2.execute(MowerDataHelper.readCommandList("AADAADADDA"));
-
-            assertEquals(state1.getPosition(), new Point(1, 3));
-            assertSame(state1.getOrientation(), Orientation.N);
-
-            assertEquals(state2.getPosition(), new Point(5, 1));
-            assertSame(state2.getOrientation(), Orientation.E);
-
+            mower2.setState(MowerDataHelper.readMowerState("3 3 E"));
+            mower2.setListener(state -> {
+                assertEquals(state.getPosition(), new Point(5, 1));
+                assertSame(state.getOrientation(), Orientation.E);
+            });
+            mower2.execute(MowerDataHelper.readCommandList("AADAADADDA"));
         } catch (MowerException e) {
             fail(e.getMessage());
         }
