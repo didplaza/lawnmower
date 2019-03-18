@@ -5,7 +5,9 @@ import com.mowitnow.mow2d.LawnLimit;
 import com.mowitnow.mow2d.Point;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Mower Data Helper: provide helpers to transform ASCII data.
@@ -43,14 +45,10 @@ public class MowerDataHelper {
 
         String[] strings = data.split(" ");
 
-        Orientation[] orientations = Orientation.values();
-        Orientation orientation = null;
-        for (Orientation o : orientations) {
-            if (o.name().startsWith(strings[2])) {
-                orientation = o;
-                break;
-            }
-        }
+        Orientation orientation = Arrays.stream(Orientation.values())
+                .filter(o -> o.name().startsWith(strings[2]))
+                .findFirst()
+                .get();
 
         return new MowerState(orientation, new Point(Integer.decode(strings[0]), Integer.decode(strings[1])));
     }
@@ -66,12 +64,10 @@ public class MowerDataHelper {
         if (!data.matches("^[GDA]+$"))
             throw new MowerException("invalid command line:" + data);
 
-        ArrayList<Command> commands = new ArrayList<>();
-        for (char c : data.toCharArray()) {
-            commands.add(Command.valueOf("" + c));
-        }
+        return data.chars()
+                .mapToObj(c -> Command.valueOf("" + (char) c))
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        return commands;
     }
 
 

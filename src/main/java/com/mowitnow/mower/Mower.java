@@ -58,8 +58,6 @@ public class Mower {
      * execute a list of command and return his position and orientation.
      *
      * @param commands list of commands to execute
-     * @return the state after commands execution
-     * @throws MowerException if something went wrong
      */
     public void execute(List<Command> commands) {
         commands.forEach(this::runCommand);
@@ -71,7 +69,6 @@ public class Mower {
      * execute a single command and return his position and orientation.
      *
      * @param command the Command to execute
-     * @return the state after the command execution
      */
     private void runCommand(Command command) {
         switch (command) {
