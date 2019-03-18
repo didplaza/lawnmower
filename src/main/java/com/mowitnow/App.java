@@ -31,7 +31,7 @@ public class App {
                 System.out.println("Initial State: " + state);
                 line = lnr.readLine();
                 if (line == null) {
-                    System.out.println("Prematured end of file");
+                    System.out.println("End of file");
                     break;
                 }
                 System.out.println("Executing " + line);
